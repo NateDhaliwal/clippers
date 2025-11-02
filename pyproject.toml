@@ -22,7 +22,6 @@ dependencies = [
 
 ]
 
-
 [project.urls]
 Homepage = "https://github.com/NateDhaliwal/clippers"
 Repository = "https://github.com/NateDhaliwal/clippers"
