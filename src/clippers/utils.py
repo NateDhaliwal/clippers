@@ -1,7 +1,7 @@
 markdown_rules = {
   'bold': {'start': '**', 'end': '**'},
   'italic': {'start': '*', 'end': '*'},
-  'list_element': {'start': '- ', 'end': ''},
+  'list_element': {'start': '\n- ', 'end': '\n'},
   'blockquote': {'start': '> ', 'end': ''},
   'codeblock': {'start': '```\n', 'end': '\n```'},
   'inline_codeblock': {'start': '`', 'end': '`'},
@@ -11,6 +11,21 @@ markdown_rules = {
   'heading_4': {'start': '#### ', 'end': ''},
   'heading_5': {'start': '##### ', 'end': ''},
   'heading_6': {'start': '###### ', 'end': ''},
+}
+
+html_rules = {
+  'bold': {'start': '<b>', 'end': '</b>'},
+  'italic': {'start': '<i>', 'end': '</i>'},
+  'list_element': {'start': '<li>', 'end': '</li>'},
+  'blockquote': {'start': '<blockquote>', 'end': '</blockquote>'},
+  'codeblock': {'start': '<pre><code>', 'end': '</code></pre>'},
+  'inline_codeblock': {'start': '<code>', 'end': '</code>'},
+  'heading_1': {'start': '<h1>', 'end': '</h1>'},
+  'heading_2': {'start': '<h2>', 'end': '</h2>'},
+  'heading_3': {'start': '<h3>', 'end': '</h3>'},
+  'heading_4': {'start': '<h4>', 'end': '</h4>'},
+  'heading_5': {'start': '<h5>', 'end': '</h5>'},
+  'heading_6': {'start': '<h5>', 'end': '</h6>'}
 }
 
 display_formatted_ansi = {
@@ -71,6 +86,30 @@ class Clippers:
       return None
     return converted_text
   
+  def markdown_all(self, markdown_type:str, full_text:str):
+    if markdown_type not in (
+      'bold',
+      'italc',
+      'list_element',
+      'blockquote',
+      'codeblock',
+      'inline_codeblock'
+      ):
+      raise Exception(
+        "Markdown type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock'"
+        )
+    converted_text = f"{markdown_rules[markdown_type]['start']}{full_text}{markdown_rules[markdown_type]['end']}"
+    if self.display:
+      if self.display_formatted:
+        try :
+          print(f"{display_formatted_ansi[markdown_type]}{full_text}{display_formatted_ansi['end']}")
+        except KeyError:
+          print(converted_text)
+      else:
+        print(converted_text)
+      return None
+    return converted_text
+  
   def color(self, target_color:str, text:str, background:bool=False):
     """
     Colours the specified text or applies a background. Text here cannot be displayed without the ANSI colour codes being escaped.
@@ -97,3 +136,6 @@ class Clippers:
       print(colored_text)
     else:
       return colored_text
+  
+  def html(self):
+    pass
