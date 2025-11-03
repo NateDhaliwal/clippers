@@ -25,7 +25,7 @@ html_rules = {
   'heading_3': {'start': '<h3>', 'end': '</h3>'},
   'heading_4': {'start': '<h4>', 'end': '</h4>'},
   'heading_5': {'start': '<h5>', 'end': '</h5>'},
-  'heading_6': {'start': '<h5>', 'end': '</h6>'}
+  'heading_6': {'start': '<h6>', 'end': '</h6>'}
 }
 
 display_formatted_ansi = {
@@ -136,6 +136,27 @@ class Clippers:
       print(colored_text)
     else:
       return colored_text
-  
-  def html(self):
-    pass
+
+  def html(self, markdown_type:str, text_to_replace:str, full_text:str):
+    if markdown_type not in (
+      'bold',
+      'italc',
+      'list_element',
+      'blockquote',
+      'codeblock',
+      'inline_codeblock'
+      ):
+      raise Exception(
+        "Markdown type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock'"
+        )
+    converted_text = full_text.replace(text_to_replace, f"{markdown_rules[markdown_type]['start']}{text_to_replace}{markdown_rules[markdown_type]['end']}")
+    if self.display:
+      if self.display_formatted:
+        try :
+          print(full_text.replace(text_to_replace, f"{display_formatted_ansi[markdown_type]}{text_to_replace}{display_formatted_ansi['end']}"))
+        except KeyError:
+          print(converted_text)
+      else:
+        print(converted_text)
+      return None
+    return converted_text
