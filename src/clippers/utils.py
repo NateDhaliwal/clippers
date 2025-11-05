@@ -62,7 +62,7 @@ class Clippers:
     self.display = display
     self.display_formatted = display_formatted
   
-  def markdown(self, markdown_type:str, text_to_replace:str, full_text:str):
+  def markdown(self, markdown_type:str, text_to_replace:list, full_text:str):
     if markdown_type not in (
       'bold',
       'italc',
@@ -74,11 +74,16 @@ class Clippers:
       raise Exception(
         "Markdown type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock'"
         )
-    converted_text = full_text.replace(text_to_replace, f"{markdown_rules[markdown_type]['start']}{text_to_replace}{markdown_rules[markdown_type]['end']}")
+    converted_text = full_text
+    for text in text_to_replace:
+      converted_text = converted_text.replace(text, f"{markdown_rules[markdown_type]['start']}{text}{markdown_rules[markdown_type]['end']}")
     if self.display:
       if self.display_formatted:
         try :
-          print(full_text.replace(text_to_replace, f"{display_formatted_ansi[markdown_type]}{text_to_replace}{display_formatted_ansi['end']}"))
+          formatted_text = full_text
+          for text in text_to_replace:
+            formatted_text = full_text.replace(text, f"{display_formatted_ansi[markdown_type]}{text}{display_formatted_ansi['end']}")
+          print(formatted_text)
         except KeyError:
           print(converted_text)
       else:
@@ -96,7 +101,7 @@ class Clippers:
       'inline_codeblock'
       ):
       raise Exception(
-        "Markdown type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock'"
+        "Markdown type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline_codeblock', or headings 1-6"
         )
     converted_text = f"{markdown_rules[markdown_type]['start']}{full_text}{markdown_rules[markdown_type]['end']}"
     if self.display:
@@ -137,23 +142,34 @@ class Clippers:
     else:
       return colored_text
 
-  def html(self, markdown_type:str, text_to_replace:str, full_text:str):
-    if markdown_type not in (
+  def html(self, html_type:str, text_to_replace:str, full_text:str):
+    if html_type not in (
       'bold',
       'italc',
       'list_element',
       'blockquote',
       'codeblock',
-      'inline_codeblock'
+      'inline_codeblock',
+      'heading_1',
+      'heading_2',
+      'heading_3',
+      'heading_4',
+      'heading_5',
+      'heading_6'
       ):
       raise Exception(
-        "Markdown type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock'"
+        "HTML type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock', or headings 1-6"
         )
-    converted_text = full_text.replace(text_to_replace, f"{markdown_rules[markdown_type]['start']}{text_to_replace}{markdown_rules[markdown_type]['end']}")
+    
+    converted_text = ""
+    if html_type == "list_element":
+      converted_text = full_text.replace(text_to_replace, f"{html_rules[html_type]['start']}{text_to_replace}{html_rules[html_type]['end']}")
+    else:
+      converted_text = full_text.replace(text_to_replace, f"{html_rules[html_type]['start']}{text_to_replace}{html_rules[html_type]['end']}")
     if self.display:
       if self.display_formatted:
         try :
-          print(full_text.replace(text_to_replace, f"{display_formatted_ansi[markdown_type]}{text_to_replace}{display_formatted_ansi['end']}"))
+          print(full_text.replace(text_to_replace, f"{display_formatted_ansi[html_type]}{text_to_replace}{display_formatted_ansi['end']}"))
         except KeyError:
           print(converted_text)
       else:
