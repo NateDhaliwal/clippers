@@ -77,6 +77,7 @@ class Clippers:
     converted_text = full_text
     for text in text_to_replace:
       converted_text = converted_text.replace(text, f"{markdown_rules[markdown_type]['start']}{text}{markdown_rules[markdown_type]['end']}")
+    
     if self.display:
       if self.display_formatted:
         try :
@@ -142,7 +143,7 @@ class Clippers:
     else:
       return colored_text
 
-  def html(self, html_type:str, text_to_replace:str, full_text:str):
+  def html(self, html_type:str, text_to_replace:list, full_text:str):
     if html_type not in (
       'bold',
       'italc',
@@ -161,7 +162,10 @@ class Clippers:
         "HTML type must be either 'bold', 'italc', 'list_element', 'blockquote', 'codeblock' or 'inline-codeblock', or headings 1-6"
         )
     
-    converted_text = ""
+    converted_text = full_text
+    for text in text_to_replace:
+      converted_text = converted_text.replace(text, f"{html_rules[html_type]['start']}{text}{html_rules[html_type]['end']}")
+    
     if html_type == "list_element":
       converted_text = full_text.replace(text_to_replace, f"{html_rules[html_type]['start']}{text_to_replace}{html_rules[html_type]['end']}")
     else:
@@ -169,7 +173,10 @@ class Clippers:
     if self.display:
       if self.display_formatted:
         try :
-          print(full_text.replace(text_to_replace, f"{display_formatted_ansi[html_type]}{text_to_replace}{display_formatted_ansi['end']}"))
+          formatted_text = full_text
+          for text in text_to_replace:
+            formatted_text = full_text.replace(text, f"{display_formatted_ansi[html_type]}{text}{display_formatted_ansi['end']}")
+          print(formatted_text)
         except KeyError:
           print(converted_text)
       else:
