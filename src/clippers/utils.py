@@ -2,7 +2,7 @@ import re
 
 markdown_rules = {
   'bold': {'start': '**', 'end': '**'},
-  'italic': {'start': '*__', 'end': '__'},
+  'italic': {'start': '__', 'end': '__'},
   'list_element': {'start': '\n- ', 'end': '\n'},
   'blockquote': {'start': '> ', 'end': ''},
   'codeblock': {'start': '```\n', 'end': '\n```'},
@@ -49,22 +49,6 @@ display_formatted_ansi = {
   'background_blue': "\033[44m",
   'background_purple': "\033[45m",
   'background_cyan': "\033[46m",
-}
-
-markdown_rules = {
-    'bold': {'start': '**', 'end': '**'},
-    'italic': {'start': '*', 'end': '*'},
-    'list_element': {'start': '\n- ', 'end': '\n'},
-    'blockquote': {'start': '> ', 'end': ''},
-    'codeblock': {'start': '```\n', 'end': '\n```'},
-    'inline_codeblock': {'start': '`', 'end': '`'},
-    # headings remain here, but we’ll handle them separately
-    'heading_1': {'start': '# ', 'end': ''},
-    'heading_2': {'start': '## ', 'end': ''},
-    'heading_3': {'start': '### ', 'end': ''},
-    'heading_4': {'start': '#### ', 'end': ''},
-    'heading_5': {'start': '##### ', 'end': ''},
-    'heading_6': {'start': '###### ', 'end': ''},
 }
 
 # Help from ChatGPT
@@ -248,15 +232,21 @@ class Clippers:
     return text_to_replace
 
   def markdown_to_html(self, text_to_replace:str):
-    markdown_tokens = detect_markdown(text_to_replace)
-    markdown_tokens_in_use = markdown_tokens # We will pop from this later
-    
-    for token in markdown_tokens:
-      try:
-        markdown_equiv = markdown_rules[token]
-        html_equiv = html_rules[token]
-        text_to_replace = text_to_replace.replace(markdown_equiv['start'], html_equiv['start'])
-        text_to_replace = text_to_replace.replace(markdown_equiv['end'], html_equiv['end'])
-      except KeyError:
-        print(self.color("red", "HTML token not found, skipping for now"))
+    markdown_tokens_text = detect_markdown(text_to_replace)
+    markdown_tokens_in_use = [] # We will pop from this later
+    start_index = 0
+    markdown_tokens = {}
+    for t in markdown_tokens_text:
+      markdown_tokens[t] = markdown_rules[t]['start'].strip()
+    print(markdown_tokens)
+    # Scan text from left to right
+    text_list = list(text_to_replace)
+    markdown_tokens_split = list("".join(markdown_tokens.values()))
+    print(markdown_tokens_split)
+    for char in text_list:
+
+      if char in markdown_tokens_split:
+        print(markdown_tokens_split.index(char))
+        substring = ""
+          
     return text_to_replace
