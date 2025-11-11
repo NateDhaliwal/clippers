@@ -1,3 +1,5 @@
+import re
+
 markdown_rules = {
   'bold': {'start': '**', 'end': '**'},
   'italic': {'start': '*', 'end': '*'},
@@ -49,9 +51,53 @@ display_formatted_ansi = {
   'background_cyan': "\033[46m",
 }
 
+markdown_rules = {
+    'bold': {'start': '**', 'end': '**'},
+    'italic': {'start': '*', 'end': '*'},
+    'list_element': {'start': '\n- ', 'end': '\n'},
+    'blockquote': {'start': '> ', 'end': ''},
+    'codeblock': {'start': '```\n', 'end': '\n```'},
+    'inline_codeblock': {'start': '`', 'end': '`'},
+    # headings remain here, but we’ll handle them separately
+    'heading_1': {'start': '# ', 'end': ''},
+    'heading_2': {'start': '## ', 'end': ''},
+    'heading_3': {'start': '### ', 'end': ''},
+    'heading_4': {'start': '#### ', 'end': ''},
+    'heading_5': {'start': '##### ', 'end': ''},
+    'heading_6': {'start': '###### ', 'end': ''},
+}
+
+# Help from ChatGPT
+def detect_markdown(text):
+  markdown_type = set()  # use a set to keep things unique
+
+  # Handle headings
+  heading_matches = re.findall(r'^(#{1,6})\s', text, flags=re.MULTILINE)
+  for hashes in heading_matches:
+    markdown_type.add(f"heading_{len(hashes)}")
+
+  for m_type, value_dict in markdown_rules.items():
+    if m_type.startswith("heading_"):
+      continue  # Already handled headings above
+
+    if value_dict['start'] in text.strip():
+      markdown_type.add(m_type)
+
+  return list(markdown_type)
+
+
+def detect_html(text):
+  html_type = []
+
+  for m_type, value_dict in html_rules.items():
+    if value_dict['start'] in text.strip():
+      html_type.append(m_type)
+
+  return html_type
+
 
 class Clippers:
-  def __init__(self, display:bool=False, display_formatted:bool=True):
+  def __init__(self, display:bool=False, display_formatted:bool=True) -> None:
     """
     Initialize the Clippers class.
 
@@ -62,7 +108,7 @@ class Clippers:
     self.display = display
     self.display_formatted = display_formatted
   
-  def markdown(self, markdown_type:str, text_to_replace:list, full_text:str):
+  def markdown(self, markdown_type:str, text_to_replace:list, full_text:str) -> str|None:
     if markdown_type not in (
       'bold',
       'italc',
@@ -92,7 +138,7 @@ class Clippers:
       return None
     return converted_text
   
-  def markdown_all(self, markdown_type:str, full_text:str):
+  def markdown_all(self, markdown_type:str, full_text:str) -> str|None:
     if markdown_type not in (
       'bold',
       'italc',
@@ -116,7 +162,7 @@ class Clippers:
       return None
     return converted_text
   
-  def color(self, target_color:str, text:str, background:bool=False):
+  def color(self, target_color:str, text:str, background:bool=False) -> str|None:
     """
     Colours the specified text or applies a background. Text here cannot be displayed without the ANSI colour codes being escaped.
 
@@ -140,10 +186,10 @@ class Clippers:
     
     if self.display:
       print(colored_text)
-    else:
-      return colored_text
+      return None
+    return colored_text
 
-  def html(self, html_type:str, text_to_replace:list, full_text:str):
+  def html(self, html_type:str, text_to_replace:list, full_text:str) -> str|None:
     if html_type not in (
       'bold',
       'italc',
@@ -163,13 +209,18 @@ class Clippers:
         )
     
     converted_text = full_text
+    if html_type == "list_element":
+        converted_text_list = converted_text.split(" ")
+
+        first = converted_text_list[converted_text_list.index(text_to_replace[0])]
+        last = converted_text_list[converted_text_list.index(text_to_replace[-1])]
+
+        converted_text_list[converted_text_list.index(text_to_replace[0])] = "<ul>" + first
+        converted_text_list[converted_text_list.index(text_to_replace[-1])] = last + "</ul>"
+        converted_text = " ".join(converted_text_list)
     for text in text_to_replace:
       converted_text = converted_text.replace(text, f"{html_rules[html_type]['start']}{text}{html_rules[html_type]['end']}")
-    
-    if html_type == "list_element":
-      converted_text = full_text.replace(text_to_replace, f"{html_rules[html_type]['start']}{text_to_replace}{html_rules[html_type]['end']}")
-    else:
-      converted_text = full_text.replace(text_to_replace, f"{html_rules[html_type]['start']}{text_to_replace}{html_rules[html_type]['end']}")
+
     if self.display:
       if self.display_formatted:
         try :
@@ -183,3 +234,6 @@ class Clippers:
         print(converted_text)
       return None
     return converted_text
+
+  def html_to_markdown(self, markdown_type:str, text_to_replace:str):
+    markdown_tokens = detect_html(text_to_replace)
