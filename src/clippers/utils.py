@@ -2,7 +2,7 @@ import re
 
 markdown_rules = {
   'bold': {'start': '**', 'end': '**'},
-  'italic': {'start': '*', 'end': '*'},
+  'italic': {'start': '*__', 'end': '__'},
   'list_element': {'start': '\n- ', 'end': '\n'},
   'blockquote': {'start': '> ', 'end': ''},
   'codeblock': {'start': '```\n', 'end': '\n```'},
@@ -68,7 +68,7 @@ markdown_rules = {
 }
 
 # Help from ChatGPT
-def detect_markdown(text):
+def detect_markdown(text) -> list:
   markdown_type = set()  # use a set to keep things unique
 
   # Handle headings
@@ -86,7 +86,7 @@ def detect_markdown(text):
   return list(markdown_type)
 
 
-def detect_html(text):
+def detect_html(text) -> list:
   html_type = []
 
   for m_type, value_dict in html_rules.items():
@@ -235,5 +235,28 @@ class Clippers:
       return None
     return converted_text
 
-  def html_to_markdown(self, markdown_type:str, text_to_replace:str):
-    markdown_tokens = detect_html(text_to_replace)
+  def html_to_markdown(self, text_to_replace:str):
+    html_tokens = detect_html(text_to_replace)
+    for token in html_tokens:
+      try:
+        markdown_equiv = markdown_rules[token]
+        html_equiv = html_rules[token]
+        text_to_replace = text_to_replace.replace(html_equiv['start'], markdown_equiv['start'])
+        text_to_replace = text_to_replace.replace(html_equiv['end'], markdown_equiv['end'])
+      except KeyError:
+        print(self.color("red", "Markdown token not found, skipping for now"))
+    return text_to_replace
+
+  def markdown_to_html(self, text_to_replace:str):
+    markdown_tokens = detect_markdown(text_to_replace)
+    markdown_tokens_in_use = markdown_tokens # We will pop from this later
+    
+    for token in markdown_tokens:
+      try:
+        markdown_equiv = markdown_rules[token]
+        html_equiv = html_rules[token]
+        text_to_replace = text_to_replace.replace(markdown_equiv['start'], html_equiv['start'])
+        text_to_replace = text_to_replace.replace(markdown_equiv['end'], html_equiv['end'])
+      except KeyError:
+        print(self.color("red", "HTML token not found, skipping for now"))
+    return text_to_replace

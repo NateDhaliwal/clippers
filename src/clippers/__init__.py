@@ -13,3 +13,14 @@ to in case I need to say:
 ### Heading 3
 # Heading 1"""))
 print(detect_html("I <b>know</b> of someone you can <i>see</i> with your own <code>eyes</code>. <h1>A header</h1>"))
+
+print(c.html_to_markdown("I <b>know</b> of someone you can <i>see</i> with your own <code>eyes</code>. <h1>A header</h1>"))
+
+print(c.markdown_to_html("""I ***know*** of a person I can:
+- tell
+- report
+to in case I need to say:
+ > This is serious. What about:
+## A header
+### Heading 3
+# Heading 1"""))
