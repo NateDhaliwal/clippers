@@ -16,10 +16,12 @@ c = Clippers()
 
 # print(c.html_to_markdown("I <b>know</b> of someone you can <i>see</i> with your own <code>eyes</code>. <h1>A header</h1>"))
 
-text = """I **know** of a __person__ I can:
+
+print(c.markdown_to_html("""
+I **know** of a __person__ I can:
 
 - tell
-
+ 
 - report
 
 to in case I need to say:
@@ -28,6 +30,4 @@ to in case I need to say:
 ### Heading 3
 # Heading 1
 """
-
-print(detect_markdown(text))
-print(c.markdown_to_html(text))
+))

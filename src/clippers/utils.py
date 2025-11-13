@@ -238,15 +238,37 @@ class Clippers:
     markdown_tokens = {}
     for t in markdown_tokens_text:
       markdown_tokens[t] = markdown_rules[t]['start'].strip()
-    print(markdown_tokens)
-    # Scan text from left to right
-    text_list = list(text_to_replace)
-    markdown_tokens_split = list("".join(markdown_tokens.values()))
-    print(markdown_tokens_split)
-    for char in text_list:
 
-      if char in markdown_tokens_split:
-        print(markdown_tokens_split.index(char))
-        substring = ""
-          
-    return text_to_replace
+    # Scan text from left to right
+    text_list = list(text_to_replace.strip())
+    # markdown_tokens_split = list("".join(markdown_tokens.values()))
+
+    for char_i in range(0, len(text_list), 2): # Step of 2
+      char = text_list[char_i]
+      if char != "#": # Exclude headers
+        double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" else char.strip()
+
+        if double_token in markdown_tokens.values():
+          token_key = list((t for t, v in markdown_tokens.items() if v == double_token))[0]
+          if text_list[char_i] == text_list[char_i - 1] and char_i > 0:
+            # Other Markdown token is before
+            # Check if open HTML tag exists
+            if token_key in markdown_tokens_in_use:
+              text_list[char_i] = html_rules[token_key]['end']
+              text_list[char_i - 1] = ""
+            else:
+              text_list[char_i] = html_rules[token_key]['start']
+              text_list[char_i + 1] = ""
+              markdown_tokens_in_use.append(token_key)
+          else:
+            # Other Markdown token is after
+            # Check if open HTML tag exists
+            if token_key in markdown_tokens_in_use:
+              text_list[char_i] = html_rules[token_key]['end']
+              text_list[char_i - 1] = ""
+            else:
+              text_list[char_i] = html_rules[token_key]['start']
+              text_list[char_i + 1] = ""
+              markdown_tokens_in_use.append(token_key)
+    print("".join(text_list))
+    return ""
