@@ -1,4 +1,4 @@
-from utils import Clippers, detect_html, detect_markdown
+from utils import Clippers, detect_html, detect_markdown, is_integer
 
 c = Clippers()
 
@@ -19,16 +19,16 @@ c = Clippers()
 
 print(c.markdown_to_html(
 """
-I  **know** of a _person_ I can do **that** and what else?:
+I **know** of a _person_ I can do **that** and what else?:
 
 - tell
-
 - **report**
 
 to in case I need to say:
-> This is serious. What this
 
+> This is serious. What this
 > to sya
+
 ## A header _hi_
 ### Heading 3
 # Heading 1

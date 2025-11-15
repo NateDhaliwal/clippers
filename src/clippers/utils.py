@@ -79,6 +79,20 @@ def detect_html(text) -> list:
 
   return html_type
 
+def is_integer(text:str|int) -> bool:
+  is_int = False
+  if type(text) == str:
+    try:
+      int(text)
+      is_int = True
+    except Exception:
+      pass
+  elif type(text) == int:
+    print("Int")
+    is_int = True
+  
+  return is_int
+
 
 class Clippers:
   def __init__(self, display:bool=False, display_formatted:bool=True) -> None:
@@ -242,16 +256,76 @@ class Clippers:
     # Scan text from left to right
     full_text_list = text_to_replace.strip().split("\n")
     # markdown_tokens_split = list("".join(markdown_tokens.values()))
-    for line in full_text_list:
-      text_list = list(line)
+    isPrevLineUl = False
+    isPrevLineOl = False
+    for line_i in range(len(full_text_list)):
+      line = full_text_list[line_i]
+      text_list = list(line.strip())
+
+      # Line is a linebreak (nothing, just empty)
+      if len(text_list) == 0:
+        text_list = [""]
+
+      # Set isPrevLineUl/Ol
+      if line_i > 0:
+        previous_line = full_text_list[line_i - 1].split("\n")[-1]
+        print("Previous line: " + previous_line)
+        if previous_line.startswith("- ") or previous_line.startswith("* "):
+          isPrevLineUl = True
+        else:
+          isPrevLineUl = False
+
+        if is_integer(list(previous_line)[0]) and list(previous_line)[1] == ".":
+          isPrevLineOl = True
+        else:
+          isPrevLineOl = False
+
+      # Check for list elements, blockquotes
+      # 2 types of lists:
+      # - Starts with dash (-) or asterisk (*)
+      # - Starts with number (1., 2., 3., etc)
+     
+      # First, check for dashes or asterisks (ul)
+      if line.startswith("- ") or line.startswith("* "):
+        print("Ul")
+        full_text_list[line_i] = "<li>" + line.lstrip("- ").lstrip("* ") + "</li>"
+        print(full_text_list[line_i])
+        # Check if previous line has an unordered list
+        if isPrevLineUl:
+          pass # Do nothing
+        else:
+          # Add opening ul tag
+          full_text_list[line_i] = "<ul>\n" + line
+      # Next, check for numbered bullets (1., 2., 3.)
+      elif is_integer(text_list[0]) and text_list[1] == ".":
+        full_text_list[line_i] = "<li>" + "".join(line[2:]) + "</li>"
+        # Check if previous line has an ordered list
+        if isPrevLineOl:
+          pass # Do nothing
+        else:
+          # Add opening ul tag
+          full_text_list[line_i] = "<ol>\n" + line
+
+      # Add closing tags for ul/ol if applicable
+      print(isPrevLineUl)
+      if isPrevLineUl and not line.startswith("- ") and not line.startswith("* "):
+        # Add closing ul tag
+        print("Closing ul")
+        full_text_list[line_i] = line + "\n</ul>"
+      
+      if isPrevLineOl and not is_integer(text_list[0]) and not text_list[1] == ".":
+        # Add closing ol tag
+        print("Closing ol")
+        full_text_list[line_i] = line + "\n</ol>"
+
       for char_i in range(0, len(text_list)):
         char = text_list[char_i]
         # Add HTML closing tag for tokens without specific closing on newlines (>, -)
-        if char == "\n":
-          if len(markdown_tokens_in_use) > 0:
-            text_list[char_i] = html_rules[markdown_tokens_in_use[0]]['end']
-            markdown_tokens_in_use.remove(markdown_tokens_in_use[0])
-            text_list[char_i + 1] = "\n"
+        # if char == "\n":
+        #   if len(markdown_tokens_in_use) > 0:
+        #     text_list[char_i] = html_rules[markdown_tokens_in_use[0]]['end']
+        #     markdown_tokens_in_use.remove(markdown_tokens_in_use[0])
+        #     text_list[char_i + 1] = "\n"
   
         if char != "#": # Exclude headers
           double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" and char.strip() != "_" else char.strip()
@@ -275,5 +349,5 @@ class Clippers:
           # Deal with headers here
           pass
        
-      print("".join(text_list))
+    print("\n".join(full_text_list))
     return ""
