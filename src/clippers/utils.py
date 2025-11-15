@@ -248,7 +248,7 @@ class Clippers:
   def markdown_to_html(self, text_to_replace:str):
     markdown_tokens_text = detect_markdown(text_to_replace)
     markdown_tokens_in_use = [] # We will pop from this later
-    start_index = 0
+    # start_index = 0
     markdown_tokens = {}
     for t in markdown_tokens_text:
       markdown_tokens[t] = markdown_rules[t]['start'].strip()
