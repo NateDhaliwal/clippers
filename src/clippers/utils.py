@@ -2,9 +2,9 @@ import re
 
 markdown_rules = {
   'bold': {'start': '**', 'end': '**'},
-  'italic': {'start': '__', 'end': '__'},
+  'italic': {'start': '_', 'end': '_'},
   'list_element': {'start': '\n- ', 'end': '\n'},
-  'blockquote': {'start': '> ', 'end': ''},
+  'blockquote': {'start': '\n> ', 'end': '\n'},
   'codeblock': {'start': '```\n', 'end': '\n```'},
   'inline_codeblock': {'start': '`', 'end': '`'},
   'heading_1': {'start': '# ', 'end': ''},
@@ -240,35 +240,40 @@ class Clippers:
       markdown_tokens[t] = markdown_rules[t]['start'].strip()
 
     # Scan text from left to right
-    text_list = list(text_to_replace.strip())
+    full_text_list = text_to_replace.strip().split("\n")
     # markdown_tokens_split = list("".join(markdown_tokens.values()))
+    for line in full_text_list:
+      text_list = list(line)
+      for char_i in range(0, len(text_list)):
+        char = text_list[char_i]
+        # Add HTML closing tag for tokens without specific closing on newlines (>, -)
+        if char == "\n":
+          if len(markdown_tokens_in_use) > 0:
+            text_list[char_i] = html_rules[markdown_tokens_in_use[0]]['end']
+            markdown_tokens_in_use.remove(markdown_tokens_in_use[0])
+            text_list[char_i + 1] = "\n"
+  
+        if char != "#": # Exclude headers
+          double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" and char.strip() != "_" else char.strip()
 
-    for char_i in range(0, len(text_list), 2): # Step of 2
-      char = text_list[char_i]
-      if char != "#": # Exclude headers
-        double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" else char.strip()
-
-        if double_token in markdown_tokens.values():
-          token_key = list((t for t, v in markdown_tokens.items() if v == double_token))[0]
-          if text_list[char_i] == text_list[char_i - 1] and char_i > 0:
-            # Other Markdown token is before
-            # Check if open HTML tag exists
-            if token_key in markdown_tokens_in_use:
-              text_list[char_i] = html_rules[token_key]['end']
-              text_list[char_i - 1] = ""
-            else:
-              text_list[char_i] = html_rules[token_key]['start']
-              text_list[char_i + 1] = ""
-              markdown_tokens_in_use.append(token_key)
-          else:
+          if double_token in markdown_tokens.values():
+            token_key = list((t for t, v in markdown_tokens.items() if v == double_token))[0]
             # Other Markdown token is after
+
             # Check if open HTML tag exists
             if token_key in markdown_tokens_in_use:
               text_list[char_i] = html_rules[token_key]['end']
-              text_list[char_i - 1] = ""
+              if len(double_token) == 2:
+                text_list[char_i + 1] = ""
+              markdown_tokens_in_use.remove(token_key)
             else:
               text_list[char_i] = html_rules[token_key]['start']
-              text_list[char_i + 1] = ""
+              if len(double_token) == 2:
+                text_list[char_i + 1] = ""
               markdown_tokens_in_use.append(token_key)
-    print("".join(text_list))
+        else:
+          # Deal with headers here
+          pass
+       
+      print("".join(text_list))
     return ""

@@ -17,16 +17,19 @@ c = Clippers()
 # print(c.html_to_markdown("I <b>know</b> of someone you can <i>see</i> with your own <code>eyes</code>. <h1>A header</h1>"))
 
 
-print(c.markdown_to_html("""
-I **know** of a __person__ I can:
+print(c.markdown_to_html(
+"""
+I  **know** of a _person_ I can do **that** and what else?:
 
 - tell
- 
-- report
+
+- **report**
 
 to in case I need to say:
-> This is serious. What about:
-## A header
+> This is serious. What this
+
+> to sya
+## A header _hi_
 ### Heading 3
 # Heading 1
 """
