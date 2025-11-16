@@ -296,6 +296,7 @@ class Clippers:
 
       # Now we start the logic to convert Markdown to HTML
       # We manipulate the `line` variable, and append it to `result` right at the end
+      # We check through each line by character
 
       for char_i in range(len(text_list)):
         char = text_list[char_i]
@@ -386,6 +387,13 @@ class Clippers:
                 markdown_tokens_in_use.remove("inline_codeblock")
                 continue
 
+      # Now, we check through for headers
+      
+      header_length = 0
+      for char in text_list:
+        if char == "#":
+          
+      
       line = "".join(text_list).replace(codeblock_language, "") if codeblock_language not in ("<empty>", "", "\n", "\n\n") else "".join(text_list)
       result.append(line)
 
