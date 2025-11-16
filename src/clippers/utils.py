@@ -250,104 +250,102 @@ class Clippers:
     markdown_tokens_in_use = [] # We will pop from this later
     # start_index = 0
     markdown_tokens = {}
+    markdown_broken_down = []
     for t in markdown_tokens_text:
       markdown_tokens[t] = markdown_rules[t]['start'].strip()
 
-    # Scan text from left to right
-    full_text_list = text_to_replace.strip().split("\n")
+    # Split text by lines, without any newlines
+    full_text_list = text_to_replace.splitlines(keepends=True)
+    result = []
     # markdown_tokens_split = list("".join(markdown_tokens.values()))
-    isPrevLineUl = False
-    isPrevLineOl = False
+
     for line_i in range(len(full_text_list)):
       line = full_text_list[line_i]
-      text_list = list(line.strip())
+      text_list = list(line)
 
-      # Line is a linebreak (nothing, just empty)
-      if len(text_list) == 0:
-        text_list = [""]
+      previous_line = full_text_list[line_i - 1]
 
-      # Set isPrevLineUl/Ol
-      if line_i > 0:
-        previous_line = full_text_list[line_i - 1].split("\n")[-1]
-        print("Previous line: " + previous_line)
-        if previous_line.startswith("- ") or previous_line.startswith("* "):
-          isPrevLineUl = True
-        else:
-          isPrevLineUl = False
-
-        if is_integer(list(previous_line)[0]) and list(previous_line)[1] == ".":
-          isPrevLineOl = True
-        else:
-          isPrevLineOl = False
-
-      # Check for list elements, blockquotes
-      # 2 types of lists:
-      # - Starts with dash (-) or asterisk (*)
-      # - Starts with number (1., 2., 3., etc)
-     
-      # First, check for dashes or asterisks (ul)
-      if line.startswith("- ") or line.startswith("* "):
-        print("Ul")
-        full_text_list[line_i] = "<li>" + line.lstrip("- ").lstrip("* ") + "</li>"
-        print(full_text_list[line_i])
-        # Check if previous line has an unordered list
-        if isPrevLineUl:
-          pass # Do nothing
-        else:
-          # Add opening ul tag
-          full_text_list[line_i] = "<ul>\n" + line
-      # Next, check for numbered bullets (1., 2., 3.)
-      elif is_integer(text_list[0]) and text_list[1] == ".":
-        full_text_list[line_i] = "<li>" + "".join(line[2:]) + "</li>"
-        # Check if previous line has an ordered list
-        if isPrevLineOl:
-          pass # Do nothing
-        else:
-          # Add opening ul tag
-          full_text_list[line_i] = "<ol>\n" + line
-
-      # Add closing tags for ul/ol if applicable
-      print(isPrevLineUl)
-      if isPrevLineUl and not line.startswith("- ") and not line.startswith("* "):
-        # Add closing ul tag
-        print("Closing ul")
-        full_text_list[line_i] = line + "\n</ul>"
-      
-      if isPrevLineOl and not is_integer(text_list[0]) and not text_list[1] == ".":
-        # Add closing ol tag
-        print("Closing ol")
-        full_text_list[line_i] = line + "\n</ol>"
-
-      for char_i in range(0, len(text_list)):
-        char = text_list[char_i]
-        # Add HTML closing tag for tokens without specific closing on newlines (>, -)
-        # if char == "\n":
-        #   if len(markdown_tokens_in_use) > 0:
-        #     text_list[char_i] = html_rules[markdown_tokens_in_use[0]]['end']
-        #     markdown_tokens_in_use.remove(markdown_tokens_in_use[0])
-        #     text_list[char_i + 1] = "\n"
-  
-        if char != "#": # Exclude headers
-          double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" and char.strip() != "_" else char.strip()
-
-          if double_token in markdown_tokens.values():
-            token_key = list((t for t, v in markdown_tokens.items() if v == double_token))[0]
-            # Other Markdown token is after
-
-            # Check if open HTML tag exists
-            if token_key in markdown_tokens_in_use:
-              text_list[char_i] = html_rules[token_key]['end']
-              if len(double_token) == 2:
-                text_list[char_i + 1] = ""
-              markdown_tokens_in_use.remove(token_key)
-            else:
-              text_list[char_i] = html_rules[token_key]['start']
-              if len(double_token) == 2:
-                text_list[char_i + 1] = ""
-              markdown_tokens_in_use.append(token_key)
-        else:
-          # Deal with headers here
+      # If line is a ul li
+      if line.startswith(("- ", "* ")):
+        # Check if previous line is a ul li
+        if line_i > 0 and previous_line.startswith(("- ", "* ")):
           pass
+        else:
+          result.append("<ul>\n")
+      
+      # If line is an ol li
+      elif is_integer(text_list[0]) and text_list[1] == ".":
+        # Check if previous line is an ol li
+        if line_i > 0 and len(previous_line) > 1 and is_integer(list(previous_line)[0]) and list(previous_line)[1] == ".":
+          pass
+        else:
+          result.append("<ol>\n")
+
+      else:
+        # Line is not an ol or ul li
+        # Close ol/ul
+
+        # Check if previous line is a ul li
+        if line_i > 0 and previous_line.startswith(("- ", "* ")):
+          result.append("</ul>\n")
+
+        # Check if previous line is an ol li
+        if line_i > 0 and len(previous_line) > 1 and is_integer(list(previous_line)[0]) and list(previous_line)[1] == ".":
+          result.append("</ol>\n")
+
+      
+
+      # Now we start the logic to convert Markdown to HTML
+      # We manipulate the `line` variable, and append it to `result` right at the end
+
+      for char_i in range(len(text_list)):
+        char = text_list[char_i]
+        previous_char = text_list[char_i - 1]
+        next_char = text_list[char_i + 1]
+
+        # Exclude headers
+        if char != "#":
+          # Bold
+          if char == "*" and next_char == "*":
+            text_list[char_i] = html_rules['bold']['start']
+            text_list[char_i + 1] = ""
+            continue
+
+      result.append(line)
+
+    print(full_text_list)
+    print("".join(result))
+
+    #   for char_i in range(0, len(text_list)):
+    #     char = text_list[char_i]
+    #     # Add HTML closing tag for tokens without specific closing on newlines (>, -)
+    #     # if char == "\n":
+    #     #   if len(markdown_tokens_in_use) > 0:
+    #     #     text_list[char_i] = html_rules[markdown_tokens_in_use[0]]['end']
+    #     #     markdown_tokens_in_use.remove(markdown_tokens_in_use[0])
+    #     #     text_list[char_i + 1] = "\n"
+  
+    #     if char != "#": # Exclude headers
+    #       double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" and char.strip() != "_" else char.strip()
+
+    #       if double_token in markdown_tokens.values():
+    #         token_key = list((t for t, v in markdown_tokens.items() if v == double_token))[0]
+    #         # Other Markdown token is after
+
+    #         # Check if open HTML tag exists
+    #         if token_key in markdown_tokens_in_use:
+    #           text_list[char_i] = html_rules[token_key]['end']
+    #           if len(double_token) == 2:
+    #             text_list[char_i + 1] = ""
+    #           markdown_tokens_in_use.remove(token_key)
+    #         else:
+    #           text_list[char_i] = html_rules[token_key]['start']
+    #           if len(double_token) == 2:
+    #             text_list[char_i + 1] = ""
+    #           markdown_tokens_in_use.append(token_key)
+    #     else:
+    #       # Deal with headers here
+    #       pass
        
-    print("\n".join(full_text_list))
+    # print("\n".join(full_text_list))
     return ""
