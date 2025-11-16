@@ -262,6 +262,7 @@ class Clippers:
     for line_i in range(len(full_text_list)):
       line = full_text_list[line_i]
       text_list = list(line)
+      codeblock_language = "<empty>"
 
       previous_line = full_text_list[line_i - 1]
 
@@ -293,59 +294,103 @@ class Clippers:
         if line_i > 0 and len(previous_line) > 1 and is_integer(list(previous_line)[0]) and list(previous_line)[1] == ".":
           result.append("</ol>\n")
 
-      
-
       # Now we start the logic to convert Markdown to HTML
       # We manipulate the `line` variable, and append it to `result` right at the end
 
       for char_i in range(len(text_list)):
         char = text_list[char_i]
         previous_char = text_list[char_i - 1]
-        next_char = text_list[char_i + 1]
+        next_char = text_list[char_i + 1] if char_i < len(text_list) - 1 else ""
+
+
+        if char_i == len(text_list) - 1 : # Last element
+          continue
+
+        # markdown_token_checks = {
+        #   "bold": (char == "*" and next_char == "*") or (char == "_" and next_char == "_"),
+        #   "italic": (char == "_" and next_char != "_") or (char == "*" and next_char != " " and next_char != "*")
+        #   'list_element': (char == "-" and char_i == 0 and next_char == " ") or (char == "*" and char_i == 0 and next_char == " ") or (is_integer(char) and next_char == "." and char_i == 0),
+        #   'blockquote': (char == ">" and char_i == 0),
+        #   'codeblock': (char == "`" and char_i == 0 and next_char == "`" and text_list[char_i + 2] == "`"),
+        #   'inline_codeblock': (char == "`" and next_char != "`" and previous_char == " "),
+        #   'heading_1': ,
+        #   'heading_2':,
+        #   'heading_3':,
+        #   'heading_4':,
+        #   'heading_5':,
+        #   'heading_6':
+        # }
 
         # Exclude headers
         if char != "#":
-          # Bold
-          if char == "*" and next_char == "*":
-            text_list[char_i] = html_rules['bold']['start']
-            text_list[char_i + 1] = ""
-            continue
+          if char_i < len(text_list) - 1:
+            # Bold
+            if (char == "*" and next_char == "*") or (char == "_" and next_char == "_"):
+              text_list[char_i] = html_rules['bold']['start'] if "bold" not in markdown_tokens_in_use else html_rules['bold']['end']
+              text_list[char_i + 1] = ""
+              if "bold" not in markdown_tokens_in_use:
+                markdown_tokens_in_use.append("bold")
+              else:
+                markdown_tokens_in_use.remove("bold")
+                continue
+              
+            # Italic
+            if (char == "_" and next_char != "_") or (char == "*" and next_char != " " and next_char != "*"): # For italics with * where it is not a li
+              text_list[char_i] = html_rules['italic']['start'] if "italic" not in markdown_tokens_in_use else html_rules['italic']['end']
+              if "italic" not in markdown_tokens_in_use:
+                markdown_tokens_in_use.append("italic")
+              else:
+                markdown_tokens_in_use.remove("italic")
+                continue
 
+            # List element
+            if (char == "-" and char_i == 0 and next_char == " ") or (char == "*" and char_i == 0 and next_char == " ") or (is_integer(char) and next_char == "." and char_i == 0):
+              text_list[char_i] = html_rules['list_element']['start']
+              text_list.pop(-1) # Remove \n at the back of the list element
+              text_list.append(html_rules['list_element']['end']) # Add closing tag at the back
+              text_list.append("\n") # Make next li (or next line) go to newline (but not \n\n)
+              text_list[char_i + 1] = ""
+              if is_integer(char) and next_char == "." and char_i == 0:
+                text_list[char_i + 2] = "" # Remove extra space
+            
+            # Blockquote
+            if char == ">" and char_i == 0:
+              text_list[char_i] = html_rules['blockquote']['start']
+              text_list.pop(-1) # Remove \n at the back of the list element
+              text_list.append(html_rules['blockquote']['end']) # Add closing tag at the back
+              text_list.append("\n") # Make next li (or next line) go to newline (but not \n\n)
+              text_list[char_i + 1] = " " if next_char != " " else ""
+
+            # Codeblock
+            if char == "`" and char_i == 0 and next_char == "`" and text_list[char_i + 2] == "`":
+              text_list[char_i] = html_rules['codeblock']['start'] if "codeblock" not in markdown_tokens_in_use else html_rules['codeblock']['end']
+              text_list[char_i + 1] = ""
+              text_list[char_i + 2] = ""
+              if "codeblock" not in markdown_tokens_in_use:
+                markdown_tokens_in_use.append("codeblock")
+
+                # Check if language is specified (we don't support that)
+                if len(text_list) != 3 and text_list[1] == "" and text_list[2] == "" and text_list[3] != "\n": # Check if langauge is in codeblock
+                  codeblock_language = "".join(text_list[2:])
+                  text_list[char_i] = html_rules['codeblock']['start'] + "\n"
+              else:
+                markdown_tokens_in_use.remove("codeblock")
+                continue
+
+            # Inline codeblock
+            if char == "`" and next_char != "`":
+              text_list[char_i] = html_rules['inline_codeblock']['start'] if "inline_codeblock" not in markdown_tokens_in_use else html_rules['inline_codeblock']['end']
+              if "inline_codeblock" not in markdown_tokens_in_use:
+                markdown_tokens_in_use.append("inline_codeblock")
+              else:
+                markdown_tokens_in_use.remove("inline_codeblock")
+                continue
+
+      line = "".join(text_list).replace(codeblock_language, "") if codeblock_language not in ("<empty>", "", "\n", "\n\n") else "".join(text_list)
       result.append(line)
 
     print(full_text_list)
-    print("".join(result))
 
-    #   for char_i in range(0, len(text_list)):
-    #     char = text_list[char_i]
-    #     # Add HTML closing tag for tokens without specific closing on newlines (>, -)
-    #     # if char == "\n":
-    #     #   if len(markdown_tokens_in_use) > 0:
-    #     #     text_list[char_i] = html_rules[markdown_tokens_in_use[0]]['end']
-    #     #     markdown_tokens_in_use.remove(markdown_tokens_in_use[0])
-    #     #     text_list[char_i + 1] = "\n"
-  
-    #     if char != "#": # Exclude headers
-    #       double_token = char.strip() + char.strip() if char.strip() != ">" and char.strip() != "-" and char.strip() != "_" else char.strip()
+    final_text = "".join(result)
 
-    #       if double_token in markdown_tokens.values():
-    #         token_key = list((t for t, v in markdown_tokens.items() if v == double_token))[0]
-    #         # Other Markdown token is after
-
-    #         # Check if open HTML tag exists
-    #         if token_key in markdown_tokens_in_use:
-    #           text_list[char_i] = html_rules[token_key]['end']
-    #           if len(double_token) == 2:
-    #             text_list[char_i + 1] = ""
-    #           markdown_tokens_in_use.remove(token_key)
-    #         else:
-    #           text_list[char_i] = html_rules[token_key]['start']
-    #           if len(double_token) == 2:
-    #             text_list[char_i + 1] = ""
-    #           markdown_tokens_in_use.append(token_key)
-    #     else:
-    #       # Deal with headers here
-    #       pass
-       
-    # print("\n".join(full_text_list))
-    return ""
+    return final_text
