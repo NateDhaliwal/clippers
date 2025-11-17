@@ -398,9 +398,13 @@ class Clippers:
           header_length += 1
           header_hashes += char # "#" character
 
-      line.lstrip(header_hashes)
-      line = html_rules[f"header_{header_length}"]["start"] + line + html_rules[f"header_{header_length}"]["end"]
-
+      if header_hashes != "":
+        line = line.lstrip(header_hashes + " ")
+        try:
+          line = html_rules[f"heading_{header_length}"]["start"] + line.rstrip("\n") + html_rules[f"heading_{header_length}"]["end"] + "\n"
+        except KeyError:
+          pass
+      
       # Add it to `result`
       result.append(line)
 
