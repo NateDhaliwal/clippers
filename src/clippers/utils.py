@@ -387,18 +387,24 @@ class Clippers:
                 markdown_tokens_in_use.remove("inline_codeblock")
                 continue
 
-      # Now, we check through for headers
+      # For that of not 
+      line = "".join(text_list).replace(codeblock_language, "") if codeblock_language not in ("<empty>", "", "\n", "\n\n") else "".join(text_list)
       
+      # Now, we check through for headers
       header_length = 0
+      header_hashes = ""
       for char in text_list:
         if char == "#":
-          
-      
-      line = "".join(text_list).replace(codeblock_language, "") if codeblock_language not in ("<empty>", "", "\n", "\n\n") else "".join(text_list)
+          header_length += 1
+          header_hashes += char # "#" character
+
+      line.lstrip(header_hashes)
+      line = html_rules[f"header_{header_length}"]["start"] + line + html_rules[f"header_{header_length}"]["end"]
+
+      # Add it to `result`
       result.append(line)
 
-    print(full_text_list)
-
+    # Join all the elements of `result` together
     final_text = "".join(result)
 
     return final_text
