@@ -389,15 +389,35 @@ class Clippers:
 
       # Now, we check through for headers
       
-      header_length = 0
-      for char in text_list:
-        if char == "#":
-          
-      
+      if line.startswith("#"):
+        header_length = 1
+        print(text_list)
+        for char_i in range(len(text_list)):
+          char = text_list[char_i]
+          next_char = text_list[char_i + 1] if char_i < len(text_list) - 1 else ""
+          if char == "#":
+            if next_char == "#":
+              header_length += 1
+              # Check if number of hashes exceeds Markdown syntax (max 6 hashes)
+              if f"heading_{header_length}" not in html_rules.keys():
+                break
+              text_list[char_i] = ""
+            else:
+              if char_i < len(text_list) - 1:
+                text_list[char_i + 1] = ""
+        try:
+          text_list.insert(0, html_rules[f'heading_{header_length}']['start'])
+          # Insert closing tag before -1, as text_list[-1] is "\n"
+          text_list.insert(-1, html_rules[f'heading_{header_length}']['end'])
+          # Remove any trailing '#'
+          text_list[header_length] = ""
+        except KeyError:
+          # Number of headers is not valid (max 6)
+          # Text will be preserved with all hashes intact
+          pass
+
       line = "".join(text_list).replace(codeblock_language, "") if codeblock_language not in ("<empty>", "", "\n", "\n\n") else "".join(text_list)
       result.append(line)
-
-    print(full_text_list)
 
     final_text = "".join(result)
 

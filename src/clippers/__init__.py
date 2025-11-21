@@ -29,6 +29,9 @@ to in case I need to say:
 > This is serious. What this
 > to sya
 
+* li one
+* li two
+
 1. Item
 2. Another item
 
@@ -37,9 +40,10 @@ this is some code
 ```
 
 So here, I have a variable called `hello`, but what does it mean?
-
 ## A header _hi_
+
 ### Heading 3
 # Heading 1
+############################ ji
 """
 ))
