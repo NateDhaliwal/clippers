@@ -387,6 +387,9 @@ class Clippers:
                 markdown_tokens_in_use.remove("inline_codeblock")
                 continue
 
+      # For that of not 
+      line = "".join(text_list).replace(codeblock_language, "") if codeblock_language not in ("<empty>", "", "\n", "\n\n") else "".join(text_list)
+      
       # Now, we check through for headers
       
       if line.startswith("#"):
