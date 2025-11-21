@@ -1,4 +1,5 @@
 .vscode/*
 dist/*
-*.egg-info/*
+clippers.egg-info/*
 __pycache__/
+src/clippers.egg-info/*
