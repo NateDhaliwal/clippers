@@ -1,0 +1,7 @@
+LICENSE
+README.md
+pyproject.toml
+clippers.egg-info/PKG-INFO
+clippers.egg-info/SOURCES.txt
+clippers.egg-info/dependency_links.txt
+clippers.egg-info/top_level.txt

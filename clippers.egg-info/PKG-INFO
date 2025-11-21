@@ -1,0 +1,26 @@
+Metadata-Version: 2.4
+Name: clippers
+Version: 0.1.0
+Summary: A package to do text, Markdown and HTML conversions and replacements
+Author: Nate Dhaliwal
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/NateDhaliwal/clippers
+Project-URL: Repository, https://github.com/NateDhaliwal/clippers
+Project-URL: Bug Tracker, https://github.com/NateDhaliwal/clippers/issues
+Keywords: python,packaging,example
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Clippers
+
+Clippers is a Python library that allows you to convert Markdown to HTML and vice-versa, as well as Markdown-ifying and HTML-ifying text.
+
+## The `Clippers` class
+The library comes with 1 class, the `Clippers` class. This holds the following methods.
+
+### Class methods
+

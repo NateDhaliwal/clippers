@@ -8,24 +8,21 @@ version = "0.1.0"
 description = "A package to do text, Markdown and HTML conversions and replacements"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file = "LICENSE" }
+license = "MIT"
 authors = [
   { name = "Nate Dhaliwal" },
 ]
 keywords = ["python", "packaging", "example"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-
-]
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/NateDhaliwal/clippers"
 Repository = "https://github.com/NateDhaliwal/clippers"
 "Bug Tracker" = "https://github.com/NateDhaliwal/clippers/issues"
 
-[tool.setuptools]
-packages = ["clippers"] # Or find = ["my_awesome_package"] for automatic discovery
+[tool.setuptools.packages.find]
+where = ["src"]
