@@ -261,7 +261,8 @@ class Clippers:
 
     for line_i in range(len(full_text_list)):
       line = full_text_list[line_i]
-      text_list = list(line)
+      text_list = list(line.lstrip(' ').rstrip(' '))
+      print(text_list)
       codeblock_language = "<empty>"
 
       previous_line = full_text_list[line_i - 1]

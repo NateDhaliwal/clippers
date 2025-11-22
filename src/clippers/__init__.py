@@ -1,1 +1,3 @@
-from .utils import Clippers, detect_html, detect_markdown
+from .utils import Clippers
+# from utils import Clippers
+# c = Clippers()
