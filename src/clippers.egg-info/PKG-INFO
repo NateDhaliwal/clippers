@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: clippers
-Version: 0.1.4
+Version: 0.1.5
 Summary: A package to do text, Markdown and HTML conversions and replacements
 Author: Nate Dhaliwal
 License-Expression: MIT
