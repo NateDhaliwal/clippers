@@ -233,7 +233,7 @@ class Clippers:
       return None
     return converted_text
 
-  def html_to_markdown(self, text_to_replace:str):
+  def html_to_markdown(self, text_to_replace:str) -> str:
     html_tokens = detect_html(text_to_replace)
     for token in html_tokens:
       try:
@@ -245,7 +245,7 @@ class Clippers:
         print(self.color("red", "Markdown token not found, skipping for now"))
     return text_to_replace
 
-  def markdown_to_html(self, text_to_replace:str):
+  def markdown_to_html(self, text_to_replace:str) -> str:
     markdown_tokens_text = detect_markdown(text_to_replace)
     markdown_tokens_in_use = [] # We will pop from this later
     # start_index = 0
